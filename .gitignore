@@ -1,0 +1,38 @@
+# Entorno virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Bases de datos locales / datos de trabajo
+*.db
+*.sqlite
+*.sqlite3
+datos/
+casos/
+
+# Exportaciones generadas
+exportaciones/
+*.xlsx.tmp
+
+# IDE / SO
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# Recursos pesados y material sensible (NO versionar)
+# - modelo Whisper (461MB), ffmpeg y el .exe empaquetado
+SoftwareTranscriptor/
+# - CDs reales de intervenciones (audio + datos de causas)
+Pruebas/
+# - archivos sueltos del transcriptor externo (ya están en SoftwareTranscriptor)
+files/
+# - carpeta de recursos locales en la RAÍZ (modelo/ffmpeg si se copian aquí).
+#   Anclado con "/" para NO excluir app/ui/recursos/ (mapa.html + Leaflet, que
+#   sí son código del proyecto).
+/recursos/

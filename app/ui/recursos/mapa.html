@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Mapa de cobertura</title>
+<link rel="stylesheet" href="leaflet/leaflet.css">
+<script src="leaflet/leaflet.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #161A20; }
+  #mapa { height: 100%; width: 100%; background: #161A20; }
+  .lbl-orden {
+    background: rgba(22, 26, 32, 0.75);
+    border: none;
+    box-shadow: none;
+    color: #E7E5DF;
+    font: 600 10px 'IBM Plex Mono', 'Consolas', monospace;
+    padding: 0 3px;
+    border-radius: 3px;
+  }
+  .lbl-orden::before { display: none; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: #1E242C;
+    color: #E7E5DF;
+    font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  }
+  .leaflet-popup-content { font-size: 12px; line-height: 1.5; margin: 10px 12px; }
+  .pop-titulo { font-weight: 600; color: #D7A53D; margin-bottom: 2px; }
+  .pop-dim { color: #8B93A1; }
+</style>
+</head>
+<body>
+<div id="mapa"></div>
+<script>
+"use strict";
+
+var capaGoogleCalles = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+  maxZoom: 20, attribution: "&copy; Google"
+});
+var capaGoogleSat = L.tileLayer("https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+  maxZoom: 20, attribution: "&copy; Google"
+});
+var capaGoogleHibrido = L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+  maxZoom: 20, attribution: "&copy; Google"
+});
+var capaOSM = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19, attribution: "&copy; OpenStreetMap"
+});
+
+var mapa = L.map("mapa", {
+  center: [-24.0, -63.5],
+  zoom: 6,
+  layers: [capaGoogleCalles],
+  zoomControl: true
+});
+
+L.control.layers({
+  "Google Calles": capaGoogleCalles,
+  "Google Satélite": capaGoogleSat,
+  "Google Híbrido": capaGoogleHibrido,
+  "OpenStreetMap": capaOSM
+}, null, { position: "topright" }).addTo(mapa);
+
+L.control.scale({ imperial: false }).addTo(mapa);
+
+var grupo = L.featureGroup().addTo(mapa);
+var ultimoBounds = null;
+var ajustePendiente = false;
+
+function tieneTamano() {
+  var s = mapa.getSize();
+  return s.x > 0 && s.y > 0;
+}
+
+function ajustarVista() {
+  if (!ultimoBounds) return;
+  if (tieneTamano()) {
+    mapa.fitBounds(ultimoBounds);
+    ajustePendiente = false;
+  } else {
+    ajustePendiente = true;
+  }
+}
+
+// La pantalla vive en un stack de Qt y arranca oculta: el contenedor mide 0x0 y
+// Leaflet cachea ese tamaño, por lo que el fitBounds inicial queda inservible.
+new ResizeObserver(function () {
+  mapa.invalidateSize();
+  if (ajustePendiente) ajustarVista();
+}).observe(document.getElementById("mapa"));
+
+// Punto destino desde (lat, lon) siguiendo un rumbo (grados) una distancia en km.
+function destino(lat, lon, rumboDeg, distKm) {
+  var R = 6371.0;
+  var br = rumboDeg * Math.PI / 180;
+  var la1 = lat * Math.PI / 180;
+  var lo1 = lon * Math.PI / 180;
+  var dR = distKm / R;
+  var la2 = Math.asin(Math.sin(la1) * Math.cos(dR) +
+                      Math.cos(la1) * Math.sin(dR) * Math.cos(br));
+  var lo2 = lo1 + Math.atan2(Math.sin(br) * Math.sin(dR) * Math.cos(la1),
+                             Math.cos(dR) - Math.sin(la1) * Math.sin(la2));
+  return [la2 * 180 / Math.PI, lo2 * 180 / Math.PI];
+}
+
+function poligonoSector(lat, lon, azimuth, radioKm, spanDeg) {
+  var pts = [[lat, lon]];
+  var desde = azimuth - spanDeg / 2;
+  var hasta = azimuth + spanDeg / 2;
+  for (var a = desde; a <= hasta; a += 4) {
+    pts.push(destino(lat, lon, a, radioKm));
+  }
+  pts.push(destino(lat, lon, hasta, radioKm));
+  pts.push([lat, lon]);
+  return pts;
+}
+
+function htmlPopup(r) {
+  var lineas = ['<div class="pop-titulo">Registro ' + r.orden + '</div>'];
+  if (r.interesado) lineas.push("<b>" + r.interesado + "</b>");
+  if (r.fecha) lineas.push('<span class="pop-dim">' + r.fecha + "</span>");
+  if (r.direccion) lineas.push(r.direccion);
+  if (r.origen || r.destino) lineas.push((r.origen || "?") + " &rarr; " + (r.destino || "?"));
+  if (r.az !== null) lineas.push('<span class="pop-dim">Azimuth ' + r.az + "&deg; &middot; radio " +
+                                 (r.radio !== null ? r.radio + " km" : "n/d") + "</span>");
+  if (r.nivel && r.nivel !== "ninguno") lineas.push("Inter&eacute;s: " + r.nivel);
+  return lineas.join("<br>");
+}
+
+function actualizarDatos(payload) {
+  grupo.clearLayers();
+  var regs = payload.registros || [];
+
+  regs.forEach(function (r) {
+    if (r.az !== null) {
+      var radioKm = r.radio !== null ? Math.max(0.3, Math.min(r.radio, 30)) : 2.0;
+      L.polygon(poligonoSector(r.lat, r.lon, r.az, radioKm, payload.span), {
+        color: r.color,
+        weight: Math.max(1, r.weight),
+        dashArray: r.dash ? "5 4" : null,
+        fillColor: r.fill,
+        fillOpacity: 0.28
+      }).addTo(grupo).bindPopup(htmlPopup(r));
+    }
+  });
+
+  if (payload.secuencia && regs.length > 1) {
+    var ruta = regs.map(function (r) { return [r.lat, r.lon]; });
+    L.polyline(ruta, { color: "#D7A53D", weight: 2, dashArray: "6 5", opacity: 0.85 })
+      .addTo(grupo);
+  }
+
+  regs.forEach(function (r) {
+    var m = L.circleMarker([r.lat, r.lon], {
+      radius: 6,
+      color: r.color,
+      weight: 2,
+      dashArray: r.dash ? "3 3" : null,
+      fillColor: r.color,
+      fillOpacity: 0.9
+    }).addTo(grupo).bindPopup(htmlPopup(r));
+    m.bindTooltip(String(r.orden), {
+      permanent: true, direction: "right", offset: [8, 0], className: "lbl-orden"
+    });
+  });
+
+  if (regs.length > 0) {
+    ultimoBounds = grupo.getBounds().pad(0.15);
+    ajustarVista();
+  }
+}
+
+function resetearVista() {
+  ajustarVista();
+}
+</script>
+</body>
+</html>

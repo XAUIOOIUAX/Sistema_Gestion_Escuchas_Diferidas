@@ -1,0 +1,9 @@
+[project]
+name = "escuchas-diferidas"
+version = "0.1.0"
+description = "Sistema de Gestión de Escuchas Diferidas — análisis y exportación de comunicaciones interceptadas."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
