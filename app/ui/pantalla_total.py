@@ -254,7 +254,7 @@ class _Celda(QTableWidgetItem):
 
 
 class _DelegadoFila(QStyledItemDelegate):
-    """Rivas el fondo de cada celda: rayado, color del abonado, hover y selección.
+    """Pinta el fondo de cada celda: rayado, color del abonado, hover y selección.
 
     El QSS define reglas para ``QTableWidget::item`` (padding y borde). Con una
     hoja de estilos activa Qt dibuja el fondo de la celda mediante

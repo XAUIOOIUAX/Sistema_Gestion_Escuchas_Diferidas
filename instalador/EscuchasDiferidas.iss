@@ -59,7 +59,17 @@ Name: "escritorio"; Description: "Crear un acceso directo en el escritorio"; \
     GroupDescription: "Accesos directos:"
 
 [Files]
-Source: "{#Origen}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; `datos` queda EXCLUIDA a propósito. Es donde el programa escribe, y si
+; alguien corrió el ejecutable desde `dist` para probarlo —cosa que se hace
+; todo el tiempo— ahí quedó su base, su perfil y su habilitación. Empaquetar
+; esa carpeta manda la base de quien compiló a todos los equipos. Esta vez
+; salió vacía; con una causa abierta sería prueba judicial repartida por
+; pendrive.
+;
+; No hace falta crearla: `app/config.py` la crea al arrancar.
+Source: "{#Origen}\*"; DestDir: "{app}"; \
+    Excludes: "datos,datos\*"; \
+    Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#Nombre}"; Filename: "{app}\{#Ejecutable}"
