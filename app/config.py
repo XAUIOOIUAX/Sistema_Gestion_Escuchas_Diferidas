@@ -126,6 +126,10 @@ CONTEXTOS_INICIALES: tuple[str, ...] = (
 RUTA_MODELO_WHISPER: Path | None = None   # .pt local (p.ej. small.pt)
 RUTA_FFMPEG: Path | None = None           # carpeta que contiene ffmpeg.exe
 PYTHON_WHISPER: Path | None = None        # python.exe con whisper instalado
+# Motor empaquetado. Si está presente no hace falta ningún Python en el equipo:
+# el .exe trae whisper y torch adentro. Se autodetecta en
+# `recursos/motor/whisper_worker.exe`.
+MOTOR_WHISPER_EXE: Path | None = None
 WHISPER_IDIOMA: str = "es"
 
 # Motor de transcripción:

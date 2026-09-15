@@ -106,6 +106,11 @@ def _cargar_modelo(args):
     try:
         import whisper  # noqa: PLC0415 — import diferido a propósito
     except ImportError as exc:
+        # El traceback completo a stderr: empaquetado, un import que falla
+        # puede ser cualquiera de la cadena (torch, numba, tiktoken) y con una
+        # sola línea no hay forma de saber cuál. La app muestra stderr.
+        import traceback  # noqa: PLC0415
+        traceback.print_exc(file=sys.stderr)
         raise _ErrorDeCarga(
             f"whisper no está instalado en este Python: {exc}"
         ) from exc

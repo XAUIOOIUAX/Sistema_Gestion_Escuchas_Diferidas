@@ -1,0 +1,206 @@
+================================================================================
+  SISTEMA DE GESTION DE ESCUCHAS DIFERIDAS
+  Instalacion y primeros pasos
+================================================================================
+
+  Contenido de este pendrive:
+
+    EscuchasDiferidas_v1.0_Setup.exe   El programa.  Va en TODOS los equipos.
+    RecursosWhisper_v1.0_Setup.exe     Whisper.  SOLO donde se transcribe.
+    LEEME.txt                          Este archivo.
+
+  No hace falta instalar Python ni ninguna otra cosa.
+
+
+================================================================================
+  PASO 1 - INSTALAR EL PROGRAMA          (en todos los equipos)
+================================================================================
+
+  1. Doble clic en  EscuchasDiferidas_v1.0_Setup.exe
+
+  2. Windows va a mostrar un cartel azul que dice
+     "Windows protegio su PC".  Es normal: el programa no esta firmado
+     con un certificado comercial.
+
+         Hacer clic en  ->  Mas informacion
+         y despues en   ->  Ejecutar de todas formas
+
+  3. Seguir el asistente.  No pide permisos de administrador.
+
+     Se instala en:
+         C:\Users\<usuario>\AppData\Local\Programs\EscuchasDiferidas
+
+
+================================================================================
+  PASO 2 - HABILITAR EL EQUIPO           (una sola vez, por equipo)
+================================================================================
+
+  Al abrirlo por primera vez, el programa muestra un CODIGO DE EQUIPO,
+  parecido a este:
+
+         A1B2C-3D4E5-F6A7B-8C9D0
+
+  1. Apretar el boton  "Copiar".
+  2. Mandarle ese codigo a quien administra el sistema.
+  3. Va a devolver una CLAVE larga.  Pegarla en el recuadro de abajo
+     y apretar "Habilitar".
+
+  Se hace UNA sola vez.  Despues el programa abre directo.
+
+  Notas:
+    - La clave sirve SOLO en ese equipo.  No se puede pasar a otro.
+    - Se puede pegar tal cual llegue, con guiones y saltos de linea.
+    - No distingue mayusculas de minusculas.
+
+
+================================================================================
+  PASO 3 - EL MOTOR DE TRANSCRIPCION     (solo donde se transcribe)
+================================================================================
+
+  Este paso es OPCIONAL y solo hace falta en el equipo que va a correr
+  la transcripcion automatica.  Los demas no lo necesitan.
+
+  1. Doble clic en  RecursosWhisper_v1.0_Setup.exe
+
+  2. IMPORTANTE:  elegir la MISMA carpeta donde se instalo el programa.
+     El instalador avisa si se equivoca de carpeta y no deja seguir.
+
+  3. Listo.  El programa lo encuentra solo, no hay nada que configurar.
+
+
+================================================================================
+  COMO SE TRABAJA UNA CAUSA
+================================================================================
+
+  El menu de la izquierda sigue el orden del trabajo real:
+
+    PREPARAR
+      Casos ................ Crear o abrir la causa.
+      Importar ............. Elegir la carpeta del CD.  Muestra un preview
+                             ANTES de escribir nada.
+
+    TRABAJAR
+      Resumen .............. Donde quedo el trabajo y por donde seguir.
+      Tabla TOTAL .......... Escuchar, marcar de interes, mandar a
+                             transcribir, mandar a Desgrabar.
+      Desgrabar ............ Escuchar y escribir: corregir el texto, marcar
+                             quien habla, anclar los minutos, interpretar.
+      Indice ............... Nombrar abonados y marcar las lineas pinchadas.
+      Validaciones ......... Lo que quedo dudoso en la importacion.
+
+    ANALIZAR
+      Mapa / Grafo / Timeline / Vinculos
+
+    CERRAR
+      Exportaciones ........ Informes Word y Excel, con deshacer por lote.
+      Papelera ............. Comunicaciones eliminadas.  Se restauran enteras.
+      Auditoria ............ Todo lo que se hizo, y QUE BASE se esta usando.
+
+  El programa vuelve solo a donde quedaste: la causa, la pantalla, la
+  comunicacion y hasta el segundo del audio.
+
+
+================================================================================
+  ATAJOS QUE CONVIENE SABER
+================================================================================
+
+  En la Tabla TOTAL (con la grilla marcada):
+
+    Espacio ....... Reproducir / pausar
+    I ............. Marcar o desmarcar DE INTERES
+    E ............. Marcar como escuchada
+    D ............. Mandar a Desgrabar  (sirve para SMS e intentos)
+    Supr .......... Enviar a la papelera
+    Ctrl+Z ........ Deshacer el ultimo borrado
+    F1 ............ Ver todos los atajos
+
+  En Desgrabar (la mesa de trabajo):
+
+    Espacio ....... Sonar desde la marca
+    Ctrl+Espacio .. Pausar y seguir, incluso mientras se escribe
+    F2 ............ Corregir el texto de esta frase
+    F3 / F4 ....... Retroceder / adelantar 5 segundos
+    F5 / F6 ....... Mas lento / mas rapido
+    Ctrl+1 / Ctrl+2  Marcar quien habla
+    Ctrl+T ........ Fijar el minuto de esta frase aca
+    Ctrl+I ........ Escribir la INTERPRETACION de la comunicacion
+    Ctrl+G ........ Darla por desgrabada y pasar a la siguiente
+    Ctrl+B ........ Esconder el menu lateral (mas lugar para trabajar)
+
+  El filete verde marca la frase sobre la que actuan los atajos.
+  El fondo ambar marca la que esta sonando.  No siempre son la misma.
+
+
+================================================================================
+  DOS COSAS QUE CONVIENE ENTENDER
+================================================================================
+
+  LOS MINUTOS DE WHISPER SON UNA CONJETURA
+
+  El motor se desfasa: el texto esta bien pero los tiempos se corren.
+  Por eso un minuto en gris y con ~ delante (~0:18) significa "esto lo
+  calculo la maquina".  Cuando lo confirmas escuchando, con Ctrl+T, se
+  muestra firme.
+
+  El informe judicial afirma a que hora se dijo cada cosa.  Eso tiene que
+  salir de alguien que escucho, no de una estimacion.
+
+
+  LA TRANSCRIPCION Y LA INTERPRETACION SON DISTINTAS
+
+  La TRANSCRIPCION dice QUE se dijo.  Va textual.
+  La INTERPRETACION dice QUE SIGNIFICA, y la escribe el analista.
+
+  En el informe salen separadas y rotuladas, para que quien lo lea pueda
+  distinguir el registro de la conclusion del analista.
+
+  En un SMS el texto NO se edita: es el registro textual de la prestadora.
+  Lo que se concluya va en la interpretacion, al costado.
+
+
+================================================================================
+  SI ALGO FALLA
+================================================================================
+
+  El programa no se cierra cuando hay un error: avisa y sigue abierto.
+
+  Cada error queda anotado en:
+
+      <carpeta del programa>\datos\errores.log
+
+  con la version, el analista y en que pantalla estaba.  En el cartel del
+  error hay un boton para abrir esa carpeta directamente.
+
+  Para reportar un problema, mandar ESE archivo.  Dice mucho mas que
+  "no anda".
+
+
+================================================================================
+  ADVERTENCIAS
+================================================================================
+
+  UN EQUIPO, UNA BASE.
+  Cada instalacion tiene su propia base de datos.  El trabajo hecho en un
+  equipo NO aparece en otro.  Si hay dudas sobre que base se esta usando,
+  la pantalla AUDITORIA lo muestra arriba de todo, con la ruta completa.
+
+  NO COPIAR LA CARPETA DEL PROGRAMA A OTRA MAQUINA.
+  No va a funcionar: la habilitacion es de ese equipo.  Hay que instalarlo
+  y pedir una clave nueva.
+
+  AL DESINSTALAR NO SE BORRAN LOS DATOS.
+  Adentro de esa carpeta puede haber meses de trabajo sobre una causa en
+  tramite.  Si hace falta borrarla, se hace a mano y a conciencia.
+
+  LA TRANSCRIPCION TARDA.
+  Referencia medida en un equipo de 4 nucleos sin placa de video: una causa
+  con 27 minutos de audio lleva unos 20 minutos.  Se lanza y se deja
+  corriendo.
+
+  HACER COPIA DE SEGURIDAD.
+  La base esta en  <carpeta del programa>\datos\escuchas.db
+  Conviene copiarla seguido a otro disco.  Es el trabajo de la causa entera
+  en un solo archivo.
+
+
+================================================================================

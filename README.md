@@ -33,6 +33,37 @@ pytest
 La base de datos se crea automáticamente en `datos/escuchas.db` al primer
 arranque.
 
+### El candado, corriendo desde el código
+
+Desde la versión 1.0 el programa se habilita equipo por equipo: al arrancar
+pide una clave y no toca la base hasta tenerla. Vale también para un clon
+recién bajado. Para habilitar la máquina de desarrollo:
+
+```powershell
+py herramientas/firmar_licencia.py <el código que muestra el programa>
+```
+
+Hace falta `herramientas/clave_privada.txt`, que **no está en el repositorio**
+a propósito: con ella se emiten claves para cualquier equipo. Quien no la
+tenga y sólo quiera correr el programa puede vaciar `CLAVE_PUBLICA_B64` en
+`app/licencia.py`, que desactiva el control por completo.
+
+Las pruebas no necesitan nada de esto: usan un par de claves descartable.
+
+## Para repartirlo
+
+El programa se entrega empaquetado, sin pedirle a nadie que instale Python:
+
+| Archivo | Qué hace |
+|---|---|
+| `EscuchasDiferidas.spec` | El ejecutable de la aplicación |
+| `WhisperWorker.spec` | El motor de transcripción, aparte (whisper y torch adentro) |
+| `instalador/*.iss` | Los dos instaladores (Inno Setup 6) |
+
+Los detalles —cómo se reparte, cómo se emiten las claves, qué protege y qué
+no— están en [`instalador/INSTALACION.md`](instalador/INSTALACION.md).
+`instalador/LEEME.txt` es el que va en el pendrive, escrito para el analista.
+
 ## Estructura del proyecto
 
 ```

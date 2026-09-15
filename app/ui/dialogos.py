@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -701,3 +702,116 @@ def _rotulo_de_entrega(r) -> str:
     if quien:
         partes.append(f"desgrabó {quien}")
     return "   ·   ".join(partes)
+
+
+class DialogoHabilitacion(QDialog):
+    """Pide la clave que habilita el programa en este equipo.
+
+    Se muestra una sola vez por equipo. Lo importante es que el analista sepa
+    QUÉ mandar y a quién: un cartel que sólo diga «no habilitado» lo deja
+    parado sin saber qué hacer, con una causa esperando.
+    """
+
+    def __init__(self, huella: str, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Habilitar el programa")
+        self.setModal(True)
+        self.setMinimumWidth(560)
+        self.clave = ""
+
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(22, 20, 22, 18)
+        lay.setSpacing(12)
+
+        titulo = QLabel("Este equipo todavía no está habilitado")
+        titulo.setObjectName("titulo")
+        lay.addWidget(titulo)
+
+        sub = QLabel(
+            "Mandá el código de equipo a quien administra el sistema y pegá "
+            "abajo la clave que te devuelva. Se hace una sola vez."
+        )
+        sub.setObjectName("subtitulo")
+        sub.setWordWrap(True)
+        lay.addWidget(sub)
+
+        rotulo = QLabel("CÓDIGO DE ESTE EQUIPO")
+        rotulo.setObjectName("seccion")
+        lay.addWidget(rotulo)
+
+        fila = QHBoxLayout()
+        self.lbl_huella = QLabel(huella)
+        self.lbl_huella.setStyleSheet(
+            "font-family:'IBM Plex Mono','Consolas',monospace; font-size:15px;"
+        )
+        self.lbl_huella.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        fila.addWidget(self.lbl_huella, 1)
+        btn_copiar = QPushButton("Copiar")
+        btn_copiar.clicked.connect(self._copiar)
+        fila.addWidget(btn_copiar)
+        lay.addLayout(fila)
+
+        rotulo2 = QLabel("CLAVE DE HABILITACIÓN")
+        rotulo2.setObjectName("seccion")
+        lay.addWidget(rotulo2)
+
+        self.txt_clave = QTextEdit()
+        self.txt_clave.setPlaceholderText(
+            "Pegá acá la clave que te mandaron. Podés pegarla tal cual, con "
+            "guiones y saltos de línea."
+        )
+        self.txt_clave.setFixedHeight(90)
+        lay.addWidget(self.txt_clave)
+
+        self.lbl_error = QLabel("")
+        self.lbl_error.setWordWrap(True)
+        self.lbl_error.setStyleSheet(f"color:{tema.DANGER};")
+        lay.addWidget(self.lbl_error)
+
+        pie = QHBoxLayout()
+        pie.addStretch(1)
+        btn_salir = QPushButton("Salir")
+        btn_salir.clicked.connect(self.reject)
+        pie.addWidget(btn_salir)
+        self.btn_ok = QPushButton("Habilitar")
+        self.btn_ok.setObjectName("primary")
+        self.btn_ok.clicked.connect(self._aceptar)
+        pie.addWidget(self.btn_ok)
+        lay.addLayout(pie)
+
+    def _copiar(self) -> None:
+        from PySide6.QtWidgets import QApplication
+
+        QApplication.clipboard().setText(self.lbl_huella.text())
+        self.lbl_error.setStyleSheet(f"color:{tema.TEAL};")
+        self.lbl_error.setText("Código copiado al portapapeles.")
+
+    def _aceptar(self) -> None:
+        from app import licencia
+
+        clave = self.txt_clave.toPlainText().strip()
+        if not clave:
+            self._fallo("Falta pegar la clave.")
+            return
+        if not licencia.guardar_clave(clave):
+            self._fallo(
+                "Esa clave no habilita este equipo. Revisá que sea la que te "
+                "mandaron para este código, y que esté completa."
+            )
+            return
+        self.clave = clave
+        self.accept()
+
+    def _fallo(self, mensaje: str) -> None:
+        self.lbl_error.setStyleSheet(f"color:{tema.DANGER};")
+        self.lbl_error.setText(mensaje)
+
+
+def pedir_habilitacion(parent: QWidget | None = None) -> bool:
+    """Muestra el diálogo si hace falta. Devuelve si el equipo quedó habilitado."""
+    from app import licencia
+
+    if licencia.esta_habilitado():
+        return True
+    dlg = DialogoHabilitacion(licencia.huella_del_equipo(), parent)
+    return dlg.exec() == QDialog.Accepted

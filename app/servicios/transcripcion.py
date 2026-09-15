@@ -40,10 +40,15 @@ class RecursosWhisper:
     modelo: Path | None = None
     ffmpeg_dir: Path | None = None
     python: Path | None = None
+    #: Motor empaquetado (`whisper_worker.exe`). Si está, NO hace falta ningún
+    #: Python en el equipo: el ejecutable trae whisper y torch adentro.
+    motor_exe: Path | None = None
 
     @property
     def disponible(self) -> bool:
-        return None not in (self.modelo, self.ffmpeg_dir, self.python)
+        if self.modelo is None or self.ffmpeg_dir is None:
+            return False
+        return self.motor_exe is not None or self.python is not None
 
     def faltantes(self) -> list[str]:
         faltan = []
@@ -51,9 +56,28 @@ class RecursosWhisper:
             faltan.append("modelo Whisper (.pt)")
         if self.ffmpeg_dir is None:
             faltan.append("ffmpeg.exe")
-        if self.python is None:
-            faltan.append("Python con whisper instalado")
+        if self.motor_exe is None and self.python is None:
+            faltan.append(
+                "el motor de transcripción (whisper_worker.exe) o un Python "
+                "con whisper instalado"
+            )
         return faltan
+
+
+def _buscar_motor_exe() -> Path | None:
+    """El motor empaquetado, si vino con el paquete de recursos.
+
+    Que exista como .exe es lo que permite instalar en un equipo sin Python:
+    whisper y torch pesan gigas y no entran en el ejecutable de la aplicación,
+    pero sí en uno propio, al lado del modelo.
+    """
+    if config.MOTOR_WHISPER_EXE and Path(config.MOTOR_WHISPER_EXE).is_file():
+        return Path(config.MOTOR_WHISPER_EXE)
+    for base in config.DIRS_RECURSOS_WHISPER:
+        candidato = Path(base) / "motor" / "whisper_worker.exe"
+        if candidato.is_file():
+            return candidato
+    return None
 
 
 def _buscar_modelo(motor: str = "openai") -> Path | None:
@@ -164,7 +188,13 @@ def localizar_recursos(motor: str | None = None) -> RecursosWhisper:
     recursos = RecursosWhisper(
         modelo=_buscar_modelo(motor or config.WHISPER_MOTOR),
         ffmpeg_dir=_buscar_ffmpeg(),
+        motor_exe=_buscar_motor_exe(),
     )
+    if recursos.motor_exe is not None:
+        # Con el motor empaquetado no se busca Python: la sonda
+        # `-c "import whisper"` lanza un subproceso por candidato y tarda
+        # segundos, para nada.
+        return recursos
     global _python_cache
     if _python_cache is not None and _python_cache.is_file():
         recursos.python = _python_cache
@@ -264,9 +294,12 @@ def comando_worker(
         raise RuntimeError(
             "Faltan recursos para transcribir: " + ", ".join(recursos.faltantes())
         )
-    return [
-        str(recursos.python),
-        str(RUTA_WORKER),
+    # Con el motor empaquetado el .exe ES el worker: no lleva script.
+    cabeza = (
+        [str(recursos.motor_exe)] if recursos.motor_exe is not None
+        else [str(recursos.python), str(RUTA_WORKER)]
+    )
+    return cabeza + [
         "--modelo", str(recursos.modelo),
         "--ffmpeg", str(recursos.ffmpeg_dir),
         "--idioma", config.WHISPER_IDIOMA,

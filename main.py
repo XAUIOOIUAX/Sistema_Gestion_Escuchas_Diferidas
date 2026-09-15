@@ -35,8 +35,17 @@ def main() -> int:
     app.setStyleSheet(tema.QSS)
     errores.instalar()
 
-    # Antes de tocar ningún dato: saber quién firma. Solo la primera vez en
-    # el equipo; después se cambia desde la barra superior.
+    # Antes que nada: que el equipo esté habilitado. Va acá y no más adelante
+    # para no abrir la base ni tocar datos de una causa en un equipo que no
+    # debería tener el programa. Si no hay clave pública configurada —el modo
+    # de desarrollo— esto no pregunta nada.
+    from app.ui.dialogos import pedir_habilitacion
+
+    if not pedir_habilitacion(None):
+        return 0
+
+    # Después: saber quién firma. Solo la primera vez en el equipo; después se
+    # cambia desde la barra superior.
     if not sesion.hay_perfil_guardado():
         from app.ui.dialogos import pedir_analista
         pedir_analista(None, primera_vez=True)

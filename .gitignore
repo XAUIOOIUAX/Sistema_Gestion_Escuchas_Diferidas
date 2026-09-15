@@ -36,3 +36,22 @@ files/
 #   Anclado con "/" para NO excluir app/ui/recursos/ (mapa.html + Leaflet, que
 #   sí son código del proyecto).
 /recursos/
+
+# La clave privada que habilita equipos. Si se filtra, cualquiera puede emitir
+# claves y el control se termina: se guarda como se guarda una credencial, en
+# la máquina de quien administra y en ningún lado más.
+herramientas/clave_privada.txt
+
+# La habilitación de ESTE equipo: es de la máquina, no del proyecto.
+datos/licencia.clave
+
+# Salida de PyInstaller. Son cientos de megas de binarios que se regeneran con
+# `py -m PyInstaller EscuchasDiferidas.spec`: no van al repositorio.
+/build/
+/build_motor/
+/dist/
+/dist_motor/
+/recursos_stage/
+
+# Los instaladores compilados. Se reparten por pendrive, no por git.
+/instalador/*.exe
