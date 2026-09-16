@@ -1,0 +1,98 @@
+================================================================================
+  COMO HABILITAR UN EQUIPO
+  Guia corta para quien administra
+================================================================================
+
+  Son tres pasos y se hacen una sola vez por maquina.
+
+
+--------------------------------------------------------------------------------
+  1. EL ANALISTA TE MANDA SU CODIGO
+--------------------------------------------------------------------------------
+
+  Abre el programa y le aparece una ventana que dice
+  "Este equipo todavia no esta habilitado", con un codigo asi:
+
+      A1B2C-3D4E5-F6A7B-8C9D0
+
+  Aprieta el boton "Copiar" y te lo manda.
+
+
+--------------------------------------------------------------------------------
+  2. VOS EMITIS LA CLAVE
+--------------------------------------------------------------------------------
+
+  Abris PowerShell y te parás en la carpeta del PROYECTO
+  (no adentro de "herramientas"):
+
+      cd "D:\NORMAS ISO\asdasd\GITS\GIT 3 (INTERVENCIONES)"
+
+  Y corres:
+
+      py herramientas\firmar_licencia.py
+
+  Te va a preguntar:
+
+      Pega el codigo del equipo: _
+
+  Pegas el codigo, Enter, y te imprime la clave larga.
+
+  Tambien se puede en un solo renglon:
+
+      py herramientas\firmar_licencia.py A1B2C-3D4E5-F6A7B-8C9D0
+
+
+--------------------------------------------------------------------------------
+  3. SE LA MANDAS Y LA PEGA
+--------------------------------------------------------------------------------
+
+  La pega en el recuadro de abajo de esa misma ventana y aprieta
+  "Habilitar".  Listo, no se vuelve a pedir en ese equipo.
+
+  La clave se puede mandar por donde sea: NO es secreta.  Solo sirve en
+  la maquina de ese codigo y en ninguna otra.
+
+
+================================================================================
+  SI ALGO NO SALE
+================================================================================
+
+  "Me escupe un texto largo y no hace nada"
+      Lo corriste sin el codigo.  Ahora pregunta; si te sigue pasando,
+      es una version vieja del archivo.
+
+  "El codigo tiene N caracteres utiles y tienen que ser 20"
+      Lo que pegaste no es un codigo de equipo.  Tiene que ser
+      4 bloques de 5 caracteres.  Suele pasar cuando se pega de mas
+      o de menos, o se pega otra cosa.
+
+  "El analista dice que la clave no le sirve"
+      Fijate que le hayas emitido la clave para EL codigo que el te
+      mando, y no el de otro equipo.  Cada clave sirve en una sola
+      maquina.
+
+  "No se reconoce 'py'"
+      Probá con  python  en lugar de  py .
+
+
+================================================================================
+  LO QUE NO HAY QUE PERDER
+================================================================================
+
+  herramientas\clave_privada.txt
+
+  Son 44 bytes.  Con ese archivo se emiten claves; sin el, no se emite
+  ninguna mas, nunca.  Si se pierde hay que generar un par nuevo, y eso
+  invalida TODAS las claves ya entregadas: habria que rehabilitar todos
+  los equipos uno por uno.
+
+  NO esta en el repositorio a proposito.  Hay una copia en el disco E,
+  en la misma carpeta "herramientas".  Ese disco, por eso, se guarda
+  como se guarda una credencial.
+
+  Conviene anotar a quien le diste cada clave.  El programa no lleva ese
+  registro, y es el dato que sirve el dia que haya que saber quien tiene
+  la herramienta.
+
+
+================================================================================

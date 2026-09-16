@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import re
 import sys
 from pathlib import Path
 
@@ -86,12 +87,37 @@ def _generar_par() -> None:
     print(f'CLAVE_PUBLICA_B64: str = "{publica}"\n')
 
 
+def normalizar_huella(crudo: str) -> str:
+    """Devuelve la huella en la forma EXACTA que firma el programa.
+
+    La firma cubre el texto `XXXXX-XXXXX-XXXXX-XXXXX` tal cual, con guiones y
+    en mayúsculas. Si el código llega de otra forma —pegado sin guiones desde
+    un chat, en minúsculas, con un rótulo adelante— firmarlo así emite una
+    clave perfectamente válida para un texto que no es la huella de nadie: no
+    falla acá, falla en el equipo del analista, sin explicación.
+
+    Por eso se reconstruye a partir de los 20 caracteres y no se acepta
+    cualquier cosa: es preferible cortar acá con un aviso.
+    """
+    limpio = re.sub(r"[^0-9A-Za-z]", "", crudo or "").upper()
+    if len(limpio) != 20:
+        raise ValueError(
+            f"El código tiene {len(limpio)} caracteres útiles y tienen que ser "
+            f"20 (4 bloques de 5). Revisá que esté completo:\n  {crudo!r}"
+        )
+    return "-".join(limpio[i:i + 5] for i in range(0, 20, 5))
+
+
 def _emitir(huella: str) -> None:
     if not RUTA_PRIVADA.exists():
         print("No hay clave privada. Primero: --generar-par")
         raise SystemExit(1)
     semilla = base64.b64decode(RUTA_PRIVADA.read_text(encoding="utf-8").strip())
-    limpia = huella.strip().upper()
+    try:
+        limpia = normalizar_huella(huella)
+    except ValueError as exc:
+        print(f"\n{exc}\n")
+        raise SystemExit(1) from exc
     firma = firmar(limpia.encode("utf-8"), semilla)
 
     # Base32 y no base64: sin distinguir mayúsculas ni caracteres que se
@@ -109,10 +135,24 @@ def _emitir(huella: str) -> None:
 
 
 if __name__ == "__main__":
+    # Sin argumentos se PREGUNTA, no se escupe la documentación entera. Se
+    # corre de a una vez cada tanto, entre un mensaje del analista y la
+    # respuesta: llenar la pantalla de texto en ese momento parece un error.
     if len(sys.argv) < 2:
-        print(__doc__)
-        raise SystemExit(1)
-    if sys.argv[1] == "--generar-par":
+        print("\n  Emisor de claves de habilitación\n")
+        try:
+            pedido = input("  Pegá el código del equipo: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            raise SystemExit(0) from None
+        if not pedido:
+            print("\n  No pegaste nada.\n")
+            raise SystemExit(1)
+        _emitir(pedido)
+    elif sys.argv[1] == "--generar-par":
         _generar_par()
+    elif sys.argv[1] in ("-h", "--help", "/?"):
+        print(__doc__)
     else:
-        _emitir(sys.argv[1])
+        # Todo lo que venga suelto, por si el código se pegó con espacios y la
+        # consola lo partió en varios argumentos.
+        _emitir(" ".join(sys.argv[1:]))

@@ -26,6 +26,8 @@
   .leaflet-popup-content { font-size: 12px; line-height: 1.5; margin: 10px 12px; }
   .pop-titulo { font-weight: 600; color: #D7A53D; margin-bottom: 2px; }
   .pop-dim { color: #8B93A1; }
+  /* Distinto del gris de los datos: lo que falta no se lee como un dato más. */
+  .pop-sin-dato { color: #C08A3E; font-style: italic; }
 </style>
 </head>
 <body>
@@ -120,8 +122,19 @@ function htmlPopup(r) {
   if (r.fecha) lineas.push('<span class="pop-dim">' + r.fecha + "</span>");
   if (r.direccion) lineas.push(r.direccion);
   if (r.origen || r.destino) lineas.push((r.origen || "?") + " &rarr; " + (r.destino || "?"));
-  if (r.az !== null) lineas.push('<span class="pop-dim">Azimuth ' + r.az + "&deg; &middot; radio " +
-                                 (r.radio !== null ? r.radio + " km" : "n/d") + "</span>");
+  // Un punto solo, sin cuña, tiene que explicarse: si no, parece que el
+  // programa no dibujó la cobertura, cuando en realidad la prestadora no la
+  // informó. Son dos cosas distintas y el lector del informe no puede
+  // adivinarlas.
+  if (r.az !== null && r.radio !== null) {
+    lineas.push('<span class="pop-dim">Azimuth ' + r.az + "&deg; &middot; radio " +
+                r.radio + " km</span>");
+  } else {
+    var falta = r.az === null && r.radio === null ? "azimuth ni radio"
+              : r.az === null ? "azimuth" : "radio";
+    lineas.push('<span class="pop-sin-dato">Sin ' + falta +
+                ": se ubica la antena, no se dibuja la cobertura</span>");
+  }
   if (r.nivel && r.nivel !== "ninguno") lineas.push("Inter&eacute;s: " + r.nivel);
   return lineas.join("<br>");
 }
@@ -131,8 +144,12 @@ function actualizarDatos(payload) {
   var regs = payload.registros || [];
 
   regs.forEach(function (r) {
-    if (r.az !== null) {
-      var radioKm = r.radio !== null ? Math.max(0.3, Math.min(r.radio, 30)) : 2.0;
+    // Hace falta el azimuth Y el radio. Antes, sin radio se dibujaba una cuña
+    // de 2 km igual, y quedaba idéntica a una medida: cobertura inventada, en
+    // un mapa que va a un informe judicial. Sin radio queda sólo el punto de
+    // la antena, que es lo único que la prestadora informó de verdad.
+    if (r.az !== null && r.radio !== null) {
+      var radioKm = Math.max(0.3, Math.min(r.radio, 30));
       L.polygon(poligonoSector(r.lat, r.lon, r.az, radioKm, payload.span), {
         color: r.color,
         weight: Math.max(1, r.weight),
